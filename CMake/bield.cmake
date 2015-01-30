@@ -5,7 +5,10 @@
 ### same CMake generation phase.                                             ###
 ################################################################################
 
-cmake_minimum_required_version(VERSION 2.8)
+# Make sure users include this script after their first call to project(...)
+if(NOT CMAKE_SYSTEM_NAME)
+  message(SEND_ERROR "You have to include bield after the first call to project(...).")
+endif()
 
 # Include guard.
 if(BIELD_INCLUDED)
@@ -32,11 +35,11 @@ include(echoTargetProperties)
 # Bield script that defines all logging-related stuff.
 # Most importantly the function bield_log(123, ""), which should be used
 # instead of message(STATUS "").
-include(bieldLogging)
+include(bield/bieldLogging)
 
 # Include the config file which determines the platform, compiler, etc.
 # It also exposes some configuration variables to the user.
-include(bieldConfig)
+include(bield/bieldGeneralConfig)
 
 # Include the file which implements all bield_ utility functions.
-include(bieldUtilities)
+include(bield/bieldUtilities)

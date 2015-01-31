@@ -75,13 +75,13 @@ function(bield_warning _ID _MESSAGE)
   endif()
 endfunction(bield_warning)
 
-function(bield_warning_not_implemented)
+function(bield_not_implemented)
   bield_warning(${BIELD_WARNING_ID_NOT_IMPLEMENTED} "[not implemented] ${ARGN}")
-endfunction(bield_warning_not_implemented)
+endfunction(bield_not_implemented)
 
 function(bield_warning_unparsed_args)
   bield_warning(${BIELD_WARNING_ID_UNPARSED_ARGS} "[unparsed args] ${ARGN}")
-endfunction()
+endfunction(bield_warning_unparsed_args)
 
 function(bield_todo)
   bield_warning(${BIELD_WARNING_ID_TODO} "[todo] ${ARGN}")

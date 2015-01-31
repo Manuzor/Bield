@@ -1,4 +1,9 @@
-#!cmake
+### Include guard
+################################################################################
+if(BIELD_CONFIG_WINDOWS_INCLUDED)
+  return()
+endif()
+set(BIELD_CONFIG_WINDOWS_INCLUDED ON)
 
 ### Cache variables
 ################################################################################
@@ -91,58 +96,58 @@ endforeach()
 if(BIELD_COMPILER_MSVC)
   if(BIELD_COMPILE_WITH_HIGHEST_WARNING_LEVEL)
     # Highest warning level.
-    set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /W4")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
   endif()
 
   # Multi-threaded compilation in all configurations.
-  set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /MP")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
   # Treat warnings as errors in all configurations.
-  set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /WX")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX")
   # Disable RTTI in all configurations.
-  set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /GR-")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
   # Use fast floating point model in all configurations.
-  set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /fp:fast")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast")
 
   if(BIELD_ARCHITECTURE_32BIT)
     # Enable SSE2 on 32 bit (incompatible with /fp:except)
-    set(BIELD_DEFAULT_COMPILE_FLAGS "${BIELD_DEFAULT_COMPILE_FLAGS} /arch:SSE2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
   endif()
 
   ### Other configurations
   ##############################################################################
   # Minimal rebuild
-  set(BIELD_DEFAULT_COMPILE_FLAGS_DEBUG "${BIELD_DEFAULT_COMPILE_FLAGS_DEBUG} /Zi /Gm")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Gm")
 
   if(MSVC11)
     # Enable debugging optimized code (release builds)
-    set(BIELD_DEFAULT_COMPILE_FLAGS_RELEASE        "${BIELD_DEFAULT_COMPILE_FLAGS_RELEASE} /d2Zi+")
-    set(BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO} /d2Zi+")
+    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} /d2Zi+")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /d2Zi+")
   endif()
 
   if(MSVC12)
     # Enable debugging optimized code (release builds)
-    set(BIELD_DEFAULT_COMPILE_FLAGS_RELEASE        "${BIELD_DEFAULT_COMPILE_FLAGS_RELEASE} /Zo")
-    set(BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO} /Zo")
+    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} /Zo")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zo")
   endif()
 
   # Maximum optimization, auto-inlining, intrinsic functions
-  set(BIELD_DEFAULT_COMPILE_FLAGS_RELEASE        "${BIELD_DEFAULT_COMPILE_FLAGS_RELEASE} /Ox /Ob2 /Oi")
-  set(BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_COMPILE_FLAGS_RELWITHDEBINFO} /Ox /Ob2 /Oi")
+  set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Ob2 /Oi")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ox /Ob2 /Oi")
 endif()
 
 ### Link flags
 ################################################################################
 if(BIELD_COMPILER_MSVC)
-  
+
   # Disable incremental linking
-  set(BIELD_DEFAULT_LINK_FLAGS_RELEASE        "${BIELD_DEFAULT_LINK_FLAGS_RELEASE} /INCREMENTAL:NO")
-  set(BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO} /INCREMENTAL:NO")
+  set(BIELD_LINKER_FLAGS_RELEASE        "${BIELD_LINKER_FLAGS_RELEASE} /INCREMENTAL:NO")
+  set(BIELD_LINKER_FLAGS_RELWITHDEBINFO "${BIELD_LINKER_FLAGS_RELWITHDEBINFO} /INCREMENTAL:NO")
 
   # Remove unreferenced data (incompatible with incremental build)
-  set(BIELD_DEFAULT_LINK_FLAGS_RELEASE        "${BIELD_DEFAULT_LINK_FLAGS_RELEASE} /OPT:REF")
-  set(BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO} /OPT:REF")
+  set(BIELD_LINKER_FLAGS_RELEASE        "${BIELD_LINKER_FLAGS_RELEASE} /OPT:REF")
+  set(BIELD_LINKER_FLAGS_RELWITHDEBINFO "${BIELD_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF")
 
   # Not sure what it does but ezEngine is using it... (incompatible with incremental build)
-  set(BIELD_DEFAULT_LINK_FLAGS_RELEASE        "${BIELD_DEFAULT_LINK_FLAGS_RELEASE} /OPT:ICF")
-  set(BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO "${BIELD_DEFAULT_LINK_FLAGS_RELWITHDEBINFO} /OPT:ICF")
+  set(BIELD_LINKER_FLAGS_RELEASE        "${BIELD_LINKER_FLAGS_RELEASE} /OPT:ICF")
+  set(BIELD_LINKER_FLAGS_RELWITHDEBINFO "${BIELD_LINKER_FLAGS_RELWITHDEBINFO} /OPT:ICF")
 endif()

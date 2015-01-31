@@ -1,4 +1,3 @@
-#!cmake
 ################################################################################
 ### This script basically just includes all dependencies to make Bield       ###
 ### work properly. It also guards against multiple inclusions during the     ###
@@ -7,18 +6,19 @@
 
 # Make sure users include this script after their first call to project(...)
 if(NOT CMAKE_SYSTEM_NAME)
-  message(SEND_ERROR "You have to include bield after the first call to project(...).")
+  message(SEND_ERROR "You have to call include(bield) AFTER the first call to project(...).")
 endif()
 
-# Include guard.
+### Include guard
+################################################################################
 if(BIELD_INCLUDED)
   return()
 endif()
-set(BIELD_INCLUDED true)
+set(BIELD_INCLUDED ON)
 
-####################
-### Dependencies ###
-####################
+################################################################################
+### Dependencies ###############################################################
+################################################################################
 
 # Used for easier parsing of optional arguments passed to bield_ functions.
 # Shipped with CMake itself.
@@ -28,18 +28,32 @@ include(CMakeParseArguments)
 # Should be located right next to this script (bield.cmake).
 include(echoTargetProperties)
 
-#####################
-### Bield scripts ###
-#####################
+################################################################################
+### Bield scripts ##############################################################
+################################################################################
 
 # Bield script that defines all logging-related stuff.
-# Most importantly the function bield_log(123, ""), which should be used
+# Most importantly the function bield_log(123 ""), which should be used
 # instead of message(STATUS "").
 include(bield/bieldLogging)
 
-# Include the config file which determines the platform, compiler, etc.
-# It also exposes some configuration variables to the user.
+# All bield_ utility functions.
+include(bield/bieldUtilities)
+
+# Compile and link flags settings and utilities.
+include(bield/bieldFlags)
+
+# General configuration.
 include(bield/bieldGeneralConfig)
 
-# Include the file which implements all bield_ utility functions.
-include(bield/bieldUtilities)
+### Platform specific configurations.
+################################################################################
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  include(bield/bieldConfig_Windows)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CURRENT_OSX_VERSION)
+  include(bield/bieldConfig_OSX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include(bield/bieldConfig_Linux)
+else()
+  bield_fatal("Unsupported platform '${CMAKE_SYSTEM_NAME}'.")
+endif()

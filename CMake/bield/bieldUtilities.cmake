@@ -1,19 +1,9 @@
-#!cmake
-
-# Make sure the master script was included first.
-if(NOT BIELD_INCLUDED)
-  message(SEND_ERROR "You should include 'bield' first.")
-endif()
 
 # Include guard.
 if(BIELD_UTILITIES_INCLUDED)
   return()
 endif()
-set(BIELD_UTILITIES_INCLUDED true)
-
-if(NOT BIELD_CONFIG_INCLUDED)
-  message(SEND_ERROR "General config was not included yet!")
-endif()
+set(BIELD_UTILITIES_INCLUDED ON)
 
 ### Dependencies
 ################################################################################
@@ -109,9 +99,6 @@ function(bield_project     PROJECT_NAME)
     bield_create_all_missing_files(${PROJECT_FILES})
   endif()
 
-  # Note: This call has to be done before the target is created.
-  bield_apply_compile_flags(${PROJECT_NAME})
-
   ### Create the target
   ##############################################################################
   if(PROJECT_LIBRARY)
@@ -128,7 +115,7 @@ function(bield_project     PROJECT_NAME)
     bield_error("This should be unreachable code!")
   endif()
 
-  bield_apply_link_flags(${PROJECT_NAME})
+  bield_apply_linker_flags(${PROJECT_NAME})
   bield_group_sources_by_file_system(${PROJECT_FILES})
   if(BIELD_USE_PCH)
     # Process pch files, adding flags to all other sources.

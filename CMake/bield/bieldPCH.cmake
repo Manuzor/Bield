@@ -1,4 +1,3 @@
-#!cmake
 
 # \note Internal function. Do not use directly.
 function(bield_process_pch PREFIX PCH_H PCH_CPP)

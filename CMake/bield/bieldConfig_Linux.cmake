@@ -65,9 +65,9 @@ set(INFO "${INFO} using ${BIELD_GENERATOR_STRING}")
 ### Detect compiler.
 ################################################################################
 if(CMAKE_CXX_COMPILER)
-  set(BIELD_COMPILER_STRING "$ENV{CXX}")
-elseif("$ENV{CXX}")
   set(BIELD_COMPILER_STRING "${CMAKE_CXX_COMPILER}")
+elseif("$ENV{CXX}")
+  set(BIELD_COMPILER_STRING "$ENV{CXX}")
 else()
   set(BIELD_COMPILER_STRING "<auto>")
 endif()

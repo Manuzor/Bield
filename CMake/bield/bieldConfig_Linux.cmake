@@ -22,6 +22,9 @@ set(BIELD_ARCHITECTURE_32BIT OFF)
 # Compiling for a 64 bit architecture?
 set(BIELD_ARCHITECTURE_64BIT OFF)
 
+# String that describes the used compiler.
+set(BIELD_COMPILER_STRING "-NOTFOUND")
+
 # String that describes the platform architecture (32/64 bit).
 set(BIELD_ARCHITECTURE_STRING "-NOTFOUND")
 

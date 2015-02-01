@@ -5,74 +5,115 @@ if(BIELD_CONFIG_WINDOWS_INCLUDED)
 endif()
 set(BIELD_CONFIG_WINDOWS_INCLUDED ON)
 
-### Cache variables
+### Set defaults. These may be overridden later within this script.
 ################################################################################
-set(BIELD_PLATFORM_WINDOWS ON CACHE INTERNAL
-    "Running on Windows." FORCE)
+# We're running on Windows.
+set(BIELD_PLATFORM_WINDOWS ON)
 
-set(BIELD_COMPILER_MSVC OFF CACHE INTERNAL
-    "Using the Microsoft Visual C++ Compiler (MSVC)." FORCE)
+# Using MSVC at all?
+set(BIELD_COMPILER_MSVC OFF)
 
-set(BIELD_COMPILER_MSVC_2010 OFF CACHE INTERNAL
-    "Using the Microsoft Visual C Compiler (MSVC) version 100 (2010)." FORCE)
+# Using MSVC version 100 (2010)?
+set(BIELD_COMPILER_MSVC_2010 OFF)
 
-set(BIELD_COMPILER_MSVC_2012 OFF CACHE INTERNAL
-    "Using the Microsoft Visual C Compiler (MSVC) version 110 (2012)." FORCE)
+# Using MSVC version 110 (2012)?
+set(BIELD_COMPILER_MSVC_2012 OFF)
 
-set(BIELD_COMPILER_MSVC_2013 OFF CACHE INTERNAL
-    "Using the Microsoft Visual C Compiler (MSVC) version 120 (2013)." FORCE)
+# Using MSVC version 120 (2013)?
+set(BIELD_COMPILER_MSVC_2013 OFF)
 
-set(BIELD_ARCHITECTURE_32BIT OFF CACHE INTERNAL
-    "Compiling for a 32 bit architecture?")
+# Compiling for a 32 bit architecture?
+set(BIELD_ARCHITECTURE_32BIT OFF)
 
-set(BIELD_ARCHITECTURE_64BIT OFF CACHE INTERNAL
-    "Compiling for a 64 bit architecture?")
+# Compiling for a 64 bit architecture?
+set(BIELD_ARCHITECTURE_64BIT OFF)
 
-### Collect data.
-################################################################################
+# String that describes the used compiler.
+set(BIELD_COMPILER_STRING "-NOTFOUND")
+
+# String that describes the platform architecture (32/64 bit).
+set(BIELD_ARCHITECTURE_STRING "-NOTFOUND")
+
+# String that describes the generator used (e.g. "VisualStudio2013").
+set(BIELD_GENERATOR_STRING "-NOTFOUND")
+
 # Info that will be logged once all information is gathered.
 set(INFO "Platform: Windows")
 
-# Supported windows generators
-if(MSVC)
-  # Visual Studio (All VS generators define MSVC)
+### Detect architecture.
+################################################################################
+if(MSVC AND CMAKE_CL_64 OR CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(BIELD_ARCHITECTURE_64BIT ON)
+  set(BIELD_ARCHITECTURE_STRING "64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(BIELD_ARCHITECTURE_32BIT ON)
+  set(BIELD_ARCHITECTURE_STRING "32")
+else()
+  bield_fatal("Enable to determine size of void* on Windows!")
+endif()
+
+set(INFO "${INFO} ${BIELD_ARCHITECTURE_STRING} bit")
+
+### Detect generator.
+################################################################################
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  # All VS generators define MSVC
+  if(NOT MSVC)
+    bield_fatal("Generator is Visual Studio, but MSVC is not defined!")
+  endif()
+
   set(BIELD_COMPILER_MSVC ON)
+  set(BIELD_COMPILER_STRING "MSVC")
 
-  # Specific compiler
-  if(MSVC12)
+  # Known MSVC version numbers are:
+  # 1200 = VS  6.0
+  # 1300 = VS  7.0
+  # 1310 = VS  7.1
+  # 1400 = VS  8.0
+  # 1500 = VS  9.0
+  # 1600 = VS 10.0 (2010)
+  # 1700 = VS 11.0 (2012)
+  # 1800 = VS 12.0 (2013)
+
+  if(MSVC_VERSION LESS 1600)
+    bield_fatal("The given generator is not supported (too old)!")
+  elseif(MSVC_VERSION GREATER 1800)
+    bield_warning_compiler_version("Newer compiler versions than VS 12.0 (2013) might not be working properly. Use at your own risk.")
+  endif()
+
+  if(MSVC12) # 2013
     set(BIELD_COMPILER_MSVC_2013 ON)
-    set(GENERATOR_PREFIX "VisualStudio2013")
-  elseif(MSVC11)
+    set(BIELD_GENERATOR_STRING "VisualStudio2013")
+  elseif(MSVC11) # 2012
     set(BIELD_COMPILER_MSVC_2012 ON)
-    set(GENERATOR_PREFIX "VisualStudio2012")
-  elseif(MSVC10)
+    set(BIELD_GENERATOR_STRING "VisualStudio2012")
+  elseif(MSVC10) # 2010
     set(BIELD_COMPILER_MSVC_2010 ON)
-    set(GENERATOR_PREFIX "VisualStudio2010")
+    set(BIELD_GENERATOR_STRING "VisualStudio2010")
   else()
-    bield_fata("Unsupported compiler version")
+    bield_error("This should be unreachable code!")
   endif()
-
-  # Architecture (32/64 bit)
-  if(CMAKE_CL_64)
-    set(BIELD_ARCHITECTURE_64BIT ON)
-    set(BIELD_ARCHITECTURE_STRING "64")
-  else()
-    set(BIELD_ARCHITECTURE_32BIT ON)
-    set(BIELD_ARCHITECTURE_STRING "32")
-  endif()
-
-  set(INFO "${INFO} ${BIELD_ARCHITECTURE_STRING} bit using ${GENERATOR_PREFIX}")
 
 else()
   bield_fatal("Generator '${CMAKE_GENERATOR}' is not supported on Windows!.")
 endif()
+set(INFO "${INFO} using ${BIELD_GENERATOR_STRING}")
+
+### Detect compiler.
+################################################################################
+# On Windows, only MSVC is supported for now.
+if(NOT MSVC)
+  bield_fatal("Unsupported compiler. Only MSVC is supported on Windows.")
+endif()
+
+set(INFO "${INFO} and ${BIELD_COMPILER_STRING}")
 
 ### Process collected data.
 ################################################################################
-bield_log(1 "${INFO}")
+bield_log(1 "${INFO}.")
 
-set(BIELD_OUTPUT_PREFIX_BIN "${BIELD_OUTPUT_DIR}/Bin/Win${GENERATOR_PREFIX}")
-set(BIELD_OUTPUT_PREFIX_LIB "${BIELD_OUTPUT_DIR}/Lib/Win${GENERATOR_PREFIX}")
+set(BIELD_OUTPUT_PREFIX_BIN "${BIELD_OUTPUT_DIR}/Bin/Win${BIELD_GENERATOR_STRING}")
+set(BIELD_OUTPUT_PREFIX_LIB "${BIELD_OUTPUT_DIR}/Lib/Win${BIELD_GENERATOR_STRING}")
 
 # Iterate over all configuration types and set appropriate output dirs.
 # Note: None is included as a default value.
@@ -84,7 +125,7 @@ foreach(cfg None ${CMAKE_CONFIGURATION_TYPES})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_PREFIX_LIB}${cfg}${BIELD_ARCHITECTURE_STRING}")
 endforeach()
 
-### Compile flags
+### Global compiler flags.
 ################################################################################
 if(BIELD_COMPILER_MSVC)
   if(BIELD_COMPILE_WITH_HIGHEST_WARNING_LEVEL)
@@ -128,7 +169,7 @@ if(BIELD_COMPILER_MSVC)
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Ox /Ob2 /Oi")
 endif()
 
-### Link flags
+### Global linker flags.
 ################################################################################
 if(BIELD_COMPILER_MSVC)
 

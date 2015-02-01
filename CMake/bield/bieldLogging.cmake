@@ -25,9 +25,10 @@ mark_as_advanced(BIELD_LOGGING_VERBOSITY
 
 ### Warning IDs
 ################################################################################
-set(BIELD_WARNING_ID_NOT_IMPLEMENTED 0)
-set(BIELD_WARNING_ID_UNPARSED_ARGS   1)
-set(BIELD_WARNING_ID_TODO            2)
+set(BIELD_WARNING_ID_NOT_IMPLEMENTED  0)
+set(BIELD_WARNING_ID_UNPARSED_ARGS    1)
+set(BIELD_WARNING_ID_TODO             2)
+set(BIELD_WARNING_ID_COMPILER_VERSION 3)
 
 ### Logging functions
 ################################################################################
@@ -85,6 +86,10 @@ endfunction(bield_warning_unparsed_args)
 
 function(bield_todo)
   bield_warning(${BIELD_WARNING_ID_TODO} "[todo] ${ARGN}")
+endfunction()
+
+function(bield_warning_compiler_version)
+  bield_warning(${BIELD_WARNING_ID_COMPILER_VERSION} "[compiler version] ${ARGN}")
 endfunction()
 
 function(bield_indent_log_prefix INDENT_STRING)

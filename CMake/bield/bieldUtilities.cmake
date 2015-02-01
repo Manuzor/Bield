@@ -5,12 +5,6 @@ if(BIELD_UTILITIES_INCLUDED)
 endif()
 set(BIELD_UTILITIES_INCLUDED ON)
 
-### Dependencies
-################################################################################
-
-# For bield_process_pch
-include(bield/bieldPCH)
-
 # helper functions
 ################################################################################
 
@@ -63,13 +57,19 @@ endfunction(bield_create_all_missing_files)
 include(bield/bieldFlags)
 
 # signature:
-# bield_project(TheProjectName                        # the name of the project.
-#               EXECUTABLE|(LIBRARY SHARED|STATIC)    # marks this project as either an executable or a library.
-#               [PCH PCH.H PCH.cpp]                   # the name of the precompiled-header files;
-#                                                     # if given, the project will be set up to use a precompiled header.
-#               FILES file0 file1 ... fileN)          # all files to include as sources.
+# bield_project(TheProjectName                      # The name of the project.
+#               EXECUTABLE|(LIBRARY SHARED|STATIC)  # Marks this project as either an executable or a library.
+#               [UNITY_BUILD]                       # Whether to generate a unity build target according to cotire.
+#               [PCH PCH.h]                         # The name of the prefix-header files;
+#                                                   # if given, the project will be set up to use a precompiled header, regardless of the BIELD_USE_PCH setting.
+#               [DEFINE_SYMBOL]                     # SHARED libraries only. Will add a #define such as MYPROJECT_EXPORTS. If omitted, will use "<to-upper>${PROJECT_NAME}</to-upper>_EXPORTS"
+#               FILES file0 file1 ... fileN)        # All files to include as sources.
+# NOTE: When using the PCH option for the MSVC or Intel C++ compiler, make sure
+#       to provide the accompanying .cpp file (e.g. PCH.cpp or stdafx.cpp) as
+#       the *first* entry to FILES.
 function(bield_project     PROJECT_NAME)
-  set(bool_options         EXECUTABLE)
+  set(bool_options         EXECUTABLE
+                           UNITY_BUILD)
   set(single_value_options LIBRARY)
   set(multi_value_options  FILES
                            PCH)
@@ -89,12 +89,18 @@ function(bield_project     PROJECT_NAME)
     bield_error("either the 'EXECUTABLE' or the 'LIBRARY <value>' must be given to a bield_project.")
   endif()
 
+  # Just in case the user did not list the PCH in the FILES option, we append it.
   list(APPEND PROJECT_FILES ${PROJECT_PCH})
+
+  # Remove duplicates to reduce headache.
+  list(REMOVE_DUPLICATES PROJECT_FILES)
+
+  # Check to see if any files were specified.
   if(NOT PROJECT_FILES)
     bield_error("No files specified for project: ${PROJECT_NAME}")
   endif()
 
-  list(REMOVE_DUPLICATES PROJECT_FILES)
+  # If enabled, create all FILES missing from the file-system.
   if(BIELD_CREATE_MISSING_FILES)
     bield_create_all_missing_files(${PROJECT_FILES})
   endif()
@@ -102,23 +108,48 @@ function(bield_project     PROJECT_NAME)
   ### Create the target
   ##############################################################################
   if(PROJECT_LIBRARY)
+    bield_log(3 "Creating ${PROJECT_LIBRARY} library target '${PROJECT_NAME}'.")
     add_library(${PROJECT_NAME} ${PROJECT_LIBRARY} ${PROJECT_FILES})
     if(PROJECT_LIBRARY STREQUAL "SHARED")
-      string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPERCASE)
-      # For a project name HelloWorld => HELLOWORLD_EXPORTS
+      # If the DEFINE_SYMBOL option was not given to bield_project,
+      # generate one by using the upper-cased PROJECT_NAME.
+      if(NOT PROJECT_DEFINE_SYMBOL)
+        # For a project name "HelloWorld" => "HELLOWORLD_EXPORTS"
+        string(TOUPPER "${PROJECT_NAME}_EXPORTS" PROJECT_DEFINE_SYMBOL)
+      endif()
       set_target_properties(${PROJECT_NAME} PROPERTIES
-                            DEFINE_SYMBOL ${PROJECT_NAME_UPPERCASE}_EXPORTS)
+                            DEFINE_SYMBOL ${PROJECT_DEFINE_SYMBOL})
     endif()
   elseif(PROJECT_EXECUTABLE)
+    bield_log(3 "Creating executable target '${PROJECT_NAME}'.")
     add_executable(${PROJECT_NAME} ${PROJECT_FILES})
   else()
     bield_error("This should be unreachable code!")
   endif()
 
+  bield_log(3 "Project files: ${PROJECT_FILES}")
+
   bield_apply_linker_flags(${PROJECT_NAME})
   bield_group_sources_by_file_system(${PROJECT_FILES})
-  if(BIELD_USE_PCH)
-    # Process pch files, adding flags to all other sources.
-    bield_process_pch(${PROJECT_NAME} ${PROJECT_PCH} ${PROJECT_FILES})
+
+  if(PROJECT_PCH)
+    bield_log(1 "Using precompiled headers for ${PROJECT_NAME} (because the PCH option was given to bield_project)")
+    set(BIELD_USE_PCH ON)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+      COTIRE_CXX_PREFIX_HEADER_INIT ${PROJECT_PCH})
   endif()
+
+  # if the UNITY_BUILD option as given, override BIELD_USE_UNITY_BUILDS
+  if(PROJECT_UNITY_BUILD)
+    set(BIELD_USE_UNITY_BUILDS ON)
+  endif()
+
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+    # Enable/disable pch.
+    COTIRE_ENABLE_PRECOMPILED_HEADER ${BIELD_USE_PCH}
+    # Enable/disable unity builds.
+    COTIRE_ADD_UNITY_BUILD ${BIELD_USE_UNITY_BUILDS})
+
+  # Invoke cotire on the target.
+  cotire(${PROJECT_NAME})
 endfunction(bield_project)

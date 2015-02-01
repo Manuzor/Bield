@@ -19,6 +19,10 @@ set(BIELD_COMPILE_WITH_HIGHEST_WARNING_LEVEL OFF CACHE BOOL
     "Whether to use the highest warning level when compiling. Good luck with that.")
 set(BIELD_CREATE_MISSING_FILES ON CACHE BOOL
     "Whether to create files found in the bield_project's FILES variable that are missing from the file system. Does not work for the GLOB option, obviously...")
+set(BIELD_USE_PCH ON CACHE BOOL
+    "Whether to use precompiled headers or not. The CMake utility 'cotire' is used to generate one if none is explicitly specified to bield_project's PCH variable.")
+set(BIELD_USE_UNITY_BUILDS OFF CACHE BOOL
+    "Whether to create unity builds using cotire (the CMake utility script).")
 
 mark_as_advanced(BIELD_FILE_TEMPLATE_DIR
                  BIELD_CREATE_MISSING_FILES)

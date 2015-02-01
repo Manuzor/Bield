@@ -28,13 +28,6 @@ set(BIELD_ARCHITECTURE_32BIT OFF CACHE INTERNAL
 set(BIELD_ARCHITECTURE_64BIT OFF CACHE INTERNAL
     "Compiling for a 64 bit architecture?")
 
-set(BIELD_USE_PCH ON CACHE BOOL
-    "Whether to use precompiled headers or not. On by default on Windows.")
-
-### Functions / Macros
-################################################################################
-bield_todo("Move PCH related stuff to bieldGeneralConfig_Windows.cmake.")
-
 ### Collect data.
 ################################################################################
 # Info that will be logged once all information is gathered.

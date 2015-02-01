@@ -28,6 +28,8 @@ include(CMakeParseArguments)
 # Should be located right next to this script (bield.cmake).
 include(echoTargetProperties)
 
+include(cotire)
+
 ################################################################################
 ### Bield scripts ##############################################################
 ################################################################################

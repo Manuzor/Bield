@@ -13,6 +13,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(BIELD_OUTPUT_DIR "${CMAKE_BINARY_DIR}/Output" CACHE PATH
     "The directory in which to create the Bin and Lib folders in.")
+set(BIELD_OUTPUT_DIR_BIN "${BIELD_OUTPUT_DIR}/Bin")
+set(BIELD_OUTPUT_DIR_LIB "${BIELD_OUTPUT_DIR}/Lib")
+
 set(BIELD_FILE_TEMPLATE_DIR "${CMAKE_MODULE_PATH}/templates" CACHE STRING
     "Directory containing all file templates used to generate new files listed in a CMakeLists.txt that do not yet exist on the filesystem.")
 set(BIELD_COMPILE_WITH_HIGHEST_WARNING_LEVEL OFF CACHE BOOL
@@ -26,9 +29,6 @@ set(BIELD_USE_UNITY_BUILDS OFF CACHE BOOL
 
 mark_as_advanced(BIELD_FILE_TEMPLATE_DIR
                  BIELD_CREATE_MISSING_FILES)
-
-set(BIELD_OUTPUT_DIR_BIN "${BIELD_OUTPUT_DIR}/Bin")
-set(BIELD_OUTPUT_DIR_LIB "${BIELD_OUTPUT_DIR}/Lib")
 
 # Set the default build type.
 if(NOT CMAKE_BUILD_TYPE)

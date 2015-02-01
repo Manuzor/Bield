@@ -68,24 +68,20 @@ set(INFO "${INFO} using ${BIELD_GENERATOR_STRING}")
 #       the compiler it uses.
 set(BIELD_COMPILER_STRING "$ENV{CXX}")
 
+# If the BIELD_COMPILER_STRING is empty, set it to <auto>, indicating that the
+# system's default compiler is used.
+if(NOT BIELD_COMPILER_STRING)
+  set(BIELD_COMPILER_STRING "<auto>")
+endif()
+
 set(INFO "${INFO} and ${BIELD_COMPILER_STRING}")
 
 ### Process collected data.
 ################################################################################
 bield_log(1 "${INFO}.")
 
-set(BIELD_OUTPUT_PREFIX_BIN "${BIELD_OUTPUT_DIR}/Bin/Linux${BIELD_GENERATOR_STRING}")
-set(BIELD_OUTPUT_PREFIX_LIB "${BIELD_OUTPUT_DIR}/Lib/Linux${BIELD_GENERATOR_STRING}")
-
-# Iterate over all configuration types and set appropriate output dirs.
-# Note: None is included as a default value.
-foreach(cfg None ${CMAKE_CONFIGURATION_TYPES})
-  string(TOUPPER "${cfg}" CFG) # Debug => DEBUG
-
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_PREFIX_BIN}${cfg}${BIELD_ARCHITECTURE_STRING}")
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_PREFIX_LIB}${cfg}${BIELD_ARCHITECTURE_STRING}")
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_PREFIX_LIB}${cfg}${BIELD_ARCHITECTURE_STRING}")
-endforeach()
+# Depends on the _STRING variables.
+bield_set_output_directories("Linux")
 
 ### Compiler flags.
 ################################################################################

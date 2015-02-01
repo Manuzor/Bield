@@ -67,10 +67,12 @@ include(bield/bieldFlags)
 # NOTE: When using the PCH option for the MSVC or Intel C++ compiler, make sure
 #       to provide the accompanying .cpp file (e.g. PCH.cpp or stdafx.cpp) as
 #       the *first* entry to FILES.
+# TODO Use CMAKE_CURRENT_SOURCE_DIR to determine the project name.
 function(bield_project     PROJECT_NAME)
   set(bool_options         EXECUTABLE
                            UNITY_BUILD)
-  set(single_value_options LIBRARY)
+  set(single_value_options LIBRARY
+                           DEFINE_SYMBOL)
   set(multi_value_options  FILES
                            PCH)
   bield_indent_log_prefix("{${PROJECT_NAME}}")

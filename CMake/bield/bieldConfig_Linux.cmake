@@ -72,6 +72,12 @@ else()
   set(BIELD_COMPILER_STRING "<auto>")
 endif()
 
+# If the BIELD_COMPILER_STRING is empty, set it to <auto>, indicating that the
+# system's default compiler is used.
+if(NOT BIELD_COMPILER_STRING)
+  set(BIELD_COMPILER_STRING "<auto>")
+endif()
+
 set(INFO "${INFO} and ${BIELD_COMPILER_STRING}")
 
 ### Process collected data.

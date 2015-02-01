@@ -14,7 +14,11 @@ function(bield_group_sources_by_file_system)
     get_filename_component(SRC_DIR "${SRC_FILE}" DIRECTORY)
     string(REPLACE "/" "\\" SRC_DIR "${SRC_DIR}")
     source_group("${SRC_DIR}" FILES "${SRC_FILE}")
-    bield_log(3 "${SRC_DIR} => ${SRC_FILE}")
+    if(SRC_DIR)
+      bield_log(3 "Group '${SRC_DIR}': ${SRC_FILE}")
+    else()
+      bield_log(3 "Top-level: ${SRC_FILE}")
+    endif()
   endforeach()
 endfunction(bield_group_sources_by_file_system)
 
@@ -49,6 +53,35 @@ function(bield_create_all_missing_files)
     endif()
   endforeach()
 endfunction(bield_create_all_missing_files)
+
+# DIR_PREFIX is something like "Win", or "Linux".
+# Note: Makes use of the typical _STRING variables, such as BIELD_GENERATOR_STRING
+function(bield_set_output_directories DIR_PREFIX)
+  set(BIELD_OUTPUT_PREFIX_BIN "${BIELD_OUTPUT_DIR}/Bin/Linux${BIELD_GENERATOR_STRING}")
+  set(BIELD_OUTPUT_PREFIX_LIB "${BIELD_OUTPUT_DIR}/Lib/Linux${BIELD_GENERATOR_STRING}")
+
+  # Configuration neutral output directories.
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BIELD_OUTPUT_DIR_BIN}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${BIELD_OUTPUT_DIR_LIB}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${BIELD_OUTPUT_DIR_LIB}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}")
+
+  bield_log(3 "CMAKE_RUNTIME_OUTPUT_DIRECTORY: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+  bield_log(3 "CMAKE_LIBRARY_OUTPUT_DIRECTORY: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+  bield_log(3 "CMAKE_ARCHIVE_OUTPUT_DIRECTORY: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+
+  # Iterate over all configuration types and set appropriate output dirs.
+  foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER "${cfg}" CFG) # Debug => _DEBUG
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_DIR_BIN}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}${cfg}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_DIR_LIB}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}${cfg}")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG} "${BIELD_OUTPUT_DIR_LIB}/${DIR_PREFIX}${BIELD_ARCHITECTURE_STRING}${BIELD_GENERATOR_STRING}${cfg}")
+
+    bield_log(3 "CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG}: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG}}")
+    bield_log(3 "CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG}: ${CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CFG}}")
+    bield_log(3 "CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG}: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFG}}")
+  endforeach()
+endfunction()
 
 # project
 ################################################################################

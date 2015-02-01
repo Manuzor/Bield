@@ -64,13 +64,11 @@ set(INFO "${INFO} using ${BIELD_GENERATOR_STRING}")
 
 ### Detect compiler.
 ################################################################################
-# Note: CMake uses the environment variables CC and CXX to determine
-#       the compiler it uses.
-set(BIELD_COMPILER_STRING "$ENV{CXX}")
-
-# If the BIELD_COMPILER_STRING is empty, set it to <auto>, indicating that the
-# system's default compiler is used.
-if(NOT BIELD_COMPILER_STRING)
+if(CMAKE_CXX_COMPILER)
+  set(BIELD_COMPILER_STRING "$ENV{CXX}")
+elseif("$ENV{CXX}")
+  set(BIELD_COMPILER_STRING "${CMAKE_CXX_COMPILER}")
+else()
   set(BIELD_COMPILER_STRING "<auto>")
 endif()
 

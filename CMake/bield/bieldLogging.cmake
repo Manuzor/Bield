@@ -84,6 +84,10 @@ function(bield_warning_unparsed_args)
   bield_warning(${BIELD_WARNING_ID_UNPARSED_ARGS} "[unparsed args] ${ARGN}")
 endfunction(bield_warning_unparsed_args)
 
+function(bield_error_unparsed_args)
+  bield_error("[unparsed args] ${ARGN}")
+endfunction(bield_error_unparsed_args)
+
 function(bield_todo)
   bield_warning(${BIELD_WARNING_ID_TODO} "[todo] ${ARGN}")
 endfunction()

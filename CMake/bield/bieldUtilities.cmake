@@ -1,11 +1,15 @@
+################################################################################
+### Note: The most important function of this file is bield_project.         ###
+################################################################################
 
-# Include guard.
+### Include guard.
+################################################################################
 if(BIELD_UTILITIES_INCLUDED)
   return()
 endif()
 set(BIELD_UTILITIES_INCLUDED ON)
 
-# helper functions
+### Helper functions
 ################################################################################
 
 function(bield_group_sources_by_file_system)
@@ -22,7 +26,7 @@ function(bield_group_sources_by_file_system)
   endforeach()
 endfunction(bield_group_sources_by_file_system)
 
-# chooses a file template based on the given FILE_EXTENSION
+# Chooses a file template based on the given FILE_EXTENSION.
 function(bield_get_file_template FILE_EXTENSION OUTPUT_VARIABLE)
   if("${FILE_EXTENSION}" STREQUAL ".h" OR
      "${FILE_EXTENSION}" STREQUAL ".hpp")
@@ -83,15 +87,14 @@ function(bield_set_output_directories DIR_PREFIX)
   endforeach()
 endfunction()
 
-# project
+### Project
 ################################################################################
 
 # Needed for bield_apply_target_flags.
 include(bield/bieldFlags)
 
 # signature:
-# bield_project(TheProjectName                      # The name of the project.
-#               EXECUTABLE|(LIBRARY SHARED|STATIC)  # Marks this project as either an executable or a library.
+# bield_project(EXECUTABLE|(LIBRARY SHARED|STATIC)  # Marks this project as either an executable or a library.
 #               [UNITY_BUILD]                       # Whether to generate a unity build target according to cotire.
 #               [PCH PCH.h]                         # The name of the prefix-header files;
 #                                                   # if given, the project will be set up to use a precompiled header, regardless of the BIELD_USE_PCH setting.
@@ -101,13 +104,14 @@ include(bield/bieldFlags)
 #       to provide the accompanying .cpp file (e.g. PCH.cpp or stdafx.cpp) as
 #       the *first* entry to FILES.
 # TODO Use CMAKE_CURRENT_SOURCE_DIR to determine the project name.
-function(bield_project     PROJECT_NAME)
+function(bield_project)
   set(bool_options         EXECUTABLE
                            UNITY_BUILD)
   set(single_value_options LIBRARY
                            DEFINE_SYMBOL)
   set(multi_value_options  FILES
                            PCH)
+  get_filename_component(PROJECT_NAME "${CMAKE_CURRENT_LIST_DIR}" NAME)
   bield_indent_log_prefix("{${PROJECT_NAME}}")
   bield_log(2 "parsing arguments")
   cmake_parse_arguments(PROJECT "${bool_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
@@ -115,7 +119,7 @@ function(bield_project     PROJECT_NAME)
   ### Error checking.
   ##############################################################################
   if(PROJECT_UNPARSED_ARGUMENTS)
-    bield_warning_unparsed_args("unparsed args: ${PROJECT_UNPARSED_ARGUMENTS}")
+    bield_error_unparsed_args(${PROJECT_UNPARSED_ARGUMENTS})
   endif()
 
   if(PROJECT_EXECUTABLE AND PROJECT_LIBRARY)
@@ -169,14 +173,14 @@ function(bield_project     PROJECT_NAME)
 
   if(PROJECT_PCH)
     bield_log(1 "Using precompiled headers for ${PROJECT_NAME} (because the PCH option was given to bield_project)")
-    set(BIELD_USE_PCH ON)
+    set(BIELD_USE_PCH ON PARENT_SCOPE)
     set_target_properties(${PROJECT_NAME} PROPERTIES
       COTIRE_CXX_PREFIX_HEADER_INIT ${PROJECT_PCH})
   endif()
 
   # if the UNITY_BUILD option as given, override BIELD_USE_UNITY_BUILDS
   if(PROJECT_UNITY_BUILD)
-    set(BIELD_USE_UNITY_BUILDS ON)
+    set(BIELD_USE_UNITY_BUILDS ON PARENT_SCOPE)
   endif()
 
   set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -58,7 +58,12 @@ function(ez_add_post_build_copy_dlls TARGET_NAME)
 endfunction(ez_add_post_build_copy_dlls)
 
 # Note: This is a recursive function
-function(ez_collect_dependencies COLLECTED_DEPENDENCIES MODULE)
+function(ez_collect_dependencies COLLECTED_DEPENDENCIES MODULE PATTERN)
+  # If the module does not match the given pattern, we discard it as dependency.
+  if(NOT MODULE MATCHES "${PATTERN}")
+    return()
+  endif()
+
   # if the dependency is already in the list of COLLECTED_DEPENDENCIES, there is nothing to be done and we return.
   list(FIND ${COLLECTED_DEPENDENCIES} ${MODULE} DEPENDENCY_LOCATION)
   if(NOT DEPENDENCY_LOCATION EQUAL -1)
@@ -82,7 +87,7 @@ function(ez_collect_dependencies COLLECTED_DEPENDENCIES MODULE)
 
     # recurse for each dependency of the current module
     foreach(MODULE_DEPENDENCY ${MODULE_DEPENDENCIES})
-      ez_collect_dependencies(LOCALLY_COLLECTED_DEPENDENCIES ${MODULE_DEPENDENCY})
+      ez_collect_dependencies(LOCALLY_COLLECTED_DEPENDENCIES ${MODULE_DEPENDENCY} "${PATTERN}")
     endforeach()
   endif()
 
@@ -143,9 +148,9 @@ endforeach()
 # If instructed to copy dlls as a post-build command, collect the dependencies of all requested components.
 if(ezEngine_POST_BUILD_COPY_DLLS)
   unset(ALL_DEPENDENCIES)
-  # collect all dependencies in ALL_DEPENDENCIES
+  # collect all ez* dependencies in ALL_DEPENDENCIES
   foreach(MODULE ${ezEngine_LIBRARIES})
-    ez_collect_dependencies(ALL_DEPENDENCIES ${MODULE})
+    ez_collect_dependencies(ALL_DEPENDENCIES ${MODULE} "^ez.*")
   endforeach()
   # now that we have all dependencies, set up custom post-build commands to copy the DLLs
   ez_add_post_build_copy_dlls(${ezEngine_POST_BUILD_COPY_DLLS} ${ALL_DEPENDENCIES})
